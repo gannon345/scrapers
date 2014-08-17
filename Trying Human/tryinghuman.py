@@ -38,6 +38,9 @@ def write_file(address_url, filename):
 
 
 def comic_soup(url):
+    """takes the url passed in, reads it, and uses BeautifulSoup to parse the HTML and find the portion of the HTML
+    containing the end-path with the actual comic image. Returns that div to get_comics() as a string so it can be
+    parsed with regex to pull the actual address value out of the string."""
     html = urllib2.urlopen(url).read()
     soup = BeautifulSoup(html)
     comicbody = soup.find("div", id="comicbody")
@@ -46,7 +49,9 @@ def comic_soup(url):
 
 def get_comics(low_val, high_val):
     """gets the comics between the value ranges specified in main. The loop creates the url path, specifies multiple
-    possible urls based on potential filetype (GIF, PNG, JPG), and then runs a check to see which URL is valid.
+    possible urls based on potential filetype (GIF, PNG, JPG), and then runs a check to see which URL is valid. Uses
+    regex to get the comic path from the soup string returned from comic_soup(url). To alter the path used, change the
+    values in the soup.find() item in comic_soup.
     After determining valid URL, write_file is called to download the file to local path."""
     comic = low_val
     last_comic = high_val
@@ -63,28 +68,31 @@ def get_comics(low_val, high_val):
             if url_check:
                 comicbody_text = comic_soup(url)
 
-                image_location1 = re.compile('comics/../comics/.+'+ext)
-                image_location2 = re.compile('comics/\d+'+ext)
+                # image_location1 = re.compile('comics/../comics/.+'+ext)
+                # image_location2 = re.compile('comics/\d+'+ext)
 
-                image_link1 = re.search(image_location1, comicbody_text)
-                image_link2 = re.search(image_location2, comicbody_text)
+                # image_link1 = re.search(image_location1, comicbody_text)
+                # image_link2 = re.search(image_location2, comicbody_text)
 
-                if image_link1:
-                    image_link_str = "http://tryinghuman.com/" + image_link1.group()
+                image_location = re.compile('comics/.+'+ext)
+                image_link = re.search(image_location, comicbody_text)
+
+                if image_link:
+                    image_link_str = "http://tryinghuman.com/" + image_link.group()
                     print "Comic found. Writing comic #" + comic_str
                     write_file(image_link_str, comic_str)
                     sleep(1.5)
                     break
 
-                elif image_link2:
-                    image_link_str = "http://tryinghuman.com/" + image_link2.group()
-                    print "Comic found. Writing comic #" + comic_str
-                    write_file(image_link_str, comic_str)
-                    sleep(1.5)
-                    break
+                # elif image_link2:
+                    # image_link_str = "http://tryinghuman.com/" + image_link2.group()
+                    # print "Comic found. Writing comic #" + comic_str
+                    # write_file(image_link_str, comic_str)
+                    # sleep(1.5)
+                    # break
 
                 else:
-                    print "No matching comic strings."
+                    print "No match for comic %d on format %s" % (comic, ext)
 
             else:
                 print "no comic found for format: %s on comic string %s" % (ext, comic_str)
@@ -98,7 +106,7 @@ def main():
     print "\n"
 
     try:
-        if int(comic_low) < int(comic_high):
+        if int(comic_low) <= int(comic_high):
             get_comics(int(comic_low), int(comic_high))
         else:
             print "invalid input\n\n"
