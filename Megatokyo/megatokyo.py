@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-Megatokyo webcomic scraper by /u/tomkatt. Takes user input to specify a range of comics and downloads
+Megatokyo webcomic scraper by gannon345. Takes user input to specify a range of comics and downloads
 the images to store as .png files. Files are named after the strip number in the URL.
 """
 # For personal use only. Feel free to modify or use for non-commercial purposes.
